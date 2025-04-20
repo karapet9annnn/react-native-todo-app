@@ -1,21 +1,23 @@
-import { useMemo, useState } from "react";
 import {
-  FlatList,
-  Image,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  Touchable,
-  TouchableOpacity,
   View,
+  Text,
+  TouchableOpacity,
+  StatusBar,
+  Image,
+  TextInput,
+  FlatList,
+  Platform,
+  KeyboardAvoidingView,
+  Keyboard,
+  StyleSheet,
 } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Entypo from "@expo/vector-icons/Entypo";
+import { useNavigation } from "expo-router";
+import { DrawerNavigationProp } from "@react-navigation/drawer";
+import { asyncStorageUtils } from "@/asyncStorageHelpers/asyncStorageHelpers";
+import Feather from "@expo/vector-icons/Feather";
 
 export const TodoItem = ({
   id,
@@ -51,6 +53,7 @@ export const TodoItem = ({
             todoDoneHandler(id);
           }}
           style={{
+            maxWidth: "80%",
             textDecorationLine: checked ? "line-through" : "none",
           }}
         >
@@ -67,67 +70,35 @@ export const TodoItem = ({
     </View>
   );
 };
-
-export default function Index() {
-  const [todoData, setTodoData] = useState([
-    {
-      id: 1,
-      title: "Todo 1",
-      checked: false,
-    },
-    {
-      id: 2,
-      title: "Todo 2",
-      checked: false,
-    },
-    {
-      id: 3,
-      title: "Todo 3",
-      checked: false,
-    },
-    {
-      id: 4,
-      title: "Todo 1",
-      checked: false,
-    },
-    {
-      id: 5,
-      title: "Todo 2",
-      checked: false,
-    },
-    {
-      id: 6,
-      title: "Todo 3",
-      checked: false,
-    },
-    {
-      id: 7,
-      title: "Todo 1",
-      checked: false,
-    },
-    {
-      id: 8,
-      title: "Todo 2",
-      checked: false,
-    },
-    {
-      id: 9,
-      title: "Todo 3",
-      checked: false,
-    },
-    {
-      id: 10,
-      title: "Todo 2",
-      checked: false,
-    },
-    {
-      id: 11,
-      title: "Todo Last",
-      checked: false,
-    },
-  ]);
+interface Todo {
+  id: number;
+  title: string;
+  checked: boolean;
+}
+export default function TodoList() {
+  const [todoData, setTodoData] = useState<Todo[]>([]);
+  const navigation = useNavigation<DrawerNavigationProp<any>>();
   const [addTodoValue, setAddTodoValue] = useState("");
   const [search, setSearch] = useState("");
+
+  const getAsyncTodoData = async () => {
+    try {
+      const data = await asyncStorageUtils.getAsyncStorageData("todos");
+      if (data) {
+        setTodoData(JSON.parse(data));
+      }
+    } catch (e) {}
+  };
+
+  const setAsyncTodoData = async (customData: Todo[]) => {
+    try {
+      await asyncStorageUtils.setAsyncStorageData(
+        "todos",
+        JSON.stringify(customData)
+      );
+    } catch (e) {}
+  };
+
   const todoHandler = (id: number) => {
     const newTodoData = todoData.map((elem) => {
       if (elem.id === id) {
@@ -135,23 +106,26 @@ export default function Index() {
       }
       return elem;
     });
+    setAsyncTodoData(newTodoData);
     setTodoData(newTodoData);
   };
 
   const addTodo = () => {
     if (addTodoValue.length > 0) {
       const newTodo = {
-        id: todoData.length + 1,
+        id: Date.now(),
         title: addTodoValue,
         checked: false,
       };
-      setTodoData((prev) => [...prev, newTodo]);
+      setAsyncTodoData([...todoData, newTodo]);
+      setTodoData([...todoData, newTodo]);
       setAddTodoValue("");
       Keyboard.dismiss();
     }
   };
   const deleteTodo = (id: number) => {
     const removedTodo = todoData.filter((elem) => elem.id !== id);
+    setAsyncTodoData(removedTodo);
     setTodoData(removedTodo);
   };
   const filteredTodos = useMemo(() => {
@@ -159,6 +133,15 @@ export default function Index() {
       .filter((todo) => todo.title.toLowerCase().includes(search.toLowerCase()))
       .reverse();
   }, [todoData, search]);
+
+  useEffect(() => {
+    getAsyncTodoData();
+  }, []);
+
+  const EmptyListElem = () => {
+    return <Text>Add Your Todos To Start Journey...😊</Text>;
+  };
+
   return (
     <SafeAreaView
       style={{
@@ -179,28 +162,44 @@ export default function Index() {
             display: "flex",
             justifyContent: "space-between",
             flexDirection: "row",
-            marginBottom: 20,
           }}
         >
           {/* MENU BTN */}
           <View
             style={{
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Entypo name="menu" size={40} color="black" />
+            <Entypo
+              name="menu"
+              size={40}
+              style={{ position: "relative", top: -7 }}
+              color="black"
+              onPress={() => navigation?.openDrawer()}
+            />
+            <Text
+              onPress={() => navigation.openDrawer()}
+              style={{ ...styles.mainTitle, marginBottom: 20 }}
+            >
+              Todos
+            </Text>
           </View>
           {/* PROFILE ICON */}
-          <View style={{ alignSelf: "flex-end" }}>
-            <Image
+          <View style={{ position: "relative", top: 7 }}>
+            {/* <Image
               width={40}
               height={40}
               source={{
                 uri: "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png",
               }}
-            />
+            /> */}
+            <Feather name="user" size={40} color="black" />
           </View>
         </View>
+
         <View>
           <TextInput
             value={search}
@@ -217,6 +216,7 @@ export default function Index() {
           />
         </View>
         <FlatList
+          ListEmptyComponent={<EmptyListElem />}
           scrollEnabled={true}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
@@ -243,7 +243,7 @@ export default function Index() {
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        // keyboardVerticalOffset={200}
+        keyboardVerticalOffset={20}
         style={{
           flexDirection: "row",
           gap: 20,
@@ -257,7 +257,7 @@ export default function Index() {
         <TextInput
           value={addTodoValue}
           onChangeText={(text) => setAddTodoValue(text)}
-          placeholderTextColor={"#000"}
+          placeholderTextColor={"#c9c7c7"}
           style={{
             height: 57,
             flex: 1,
@@ -265,7 +265,7 @@ export default function Index() {
             backgroundColor: "#fff",
             borderRadius: 10,
           }}
-          placeholder="Add Todo"
+          placeholder="Add Your Todos..."
         />
         <TouchableOpacity
           onPress={() => addTodo()}
@@ -286,3 +286,10 @@ export default function Index() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  mainTitle: {
+    fontSize: 40,
+    fontWeight: 700,
+  },
+});
