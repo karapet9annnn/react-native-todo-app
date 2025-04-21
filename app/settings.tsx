@@ -12,11 +12,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 // import TodoList from "./todoList";
+import { asyncStorageUtils } from "@/asyncStorageHelpers/asyncStorageHelpers";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Entypo from "@expo/vector-icons/Entypo";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "expo-router";
-import { asyncStorageUtils } from "@/asyncStorageHelpers/asyncStorageHelpers";
-import Entypo from "@expo/vector-icons/Entypo";
-import AntDesign from "@expo/vector-icons/AntDesign";
 
 // SETTINGS
 export default function Index() {
@@ -50,9 +50,7 @@ export default function Index() {
           color="black"
           onPress={() => navigation?.openDrawer()}
         />
-        <Text onPress={() => navigation.openDrawer()} style={styles.mainTitle}>
-          Settings
-        </Text>
+        <Text style={styles.mainTitle}>Settings</Text>
       </View>
       {/* MAIN CONTENT */}
       <View style={styles.mainContent}>

@@ -1,23 +1,22 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StatusBar,
-  Image,
-  TextInput,
-  FlatList,
-  Platform,
-  KeyboardAvoidingView,
-  Keyboard,
-  StyleSheet,
-} from "react-native";
-import React, { useEffect, useMemo, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Entypo from "@expo/vector-icons/Entypo";
-import { useNavigation } from "expo-router";
-import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { asyncStorageUtils } from "@/asyncStorageHelpers/asyncStorageHelpers";
+import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
+import { DrawerNavigationProp } from "@react-navigation/drawer";
+import { useNavigation } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const TodoItem = ({
   id,
@@ -180,12 +179,7 @@ export default function TodoList() {
               color="black"
               onPress={() => navigation?.openDrawer()}
             />
-            <Text
-              onPress={() => navigation.openDrawer()}
-              style={{ ...styles.mainTitle, marginBottom: 20 }}
-            >
-              Todos
-            </Text>
+            <Text style={{ ...styles.mainTitle, marginBottom: 20 }}>Todos</Text>
           </View>
           {/* PROFILE ICON */}
           <View style={{ position: "relative", top: 7 }}>
@@ -199,7 +193,6 @@ export default function TodoList() {
             <Feather name="user" size={40} color="black" />
           </View>
         </View>
-
         <View>
           <TextInput
             value={search}
